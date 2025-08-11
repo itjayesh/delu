@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppContext, AppContextType } from '../context/AppContext';
 import { User, Gig, GigStatus, WalletLoadRequest, Transaction, TransactionType, Coupon, WithdrawalRequest, GigUser, WalletRequestStatus, WithdrawalRequestStatus } from '../types';
 import { MOCK_USERS, MOCK_GIGS, MOCK_COUPONS, MOCK_PLATFORM_CONFIG } from '../mockData';
@@ -373,7 +373,7 @@ const App: React.FC = () => {
 
     return (
         <AppContext.Provider value={appContextValue}>
-            <HashRouter>
+            <BrowserRouter>
                 <AuthModal />
                 <Routes>
                     <Route
@@ -405,7 +405,7 @@ const App: React.FC = () => {
                         }
                     />
                 </Routes>
-            </HashRouter>
+            </BrowserRouter>
         </AppContext.Provider>
     );
 };
