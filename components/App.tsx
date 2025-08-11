@@ -7,6 +7,7 @@ import { MOCK_USERS, MOCK_GIGS, MOCK_COUPONS, MOCK_PLATFORM_CONFIG } from '../mo
 
 import ProtectedRoute from './ProtectedRoute';
 import AdminProtectedRoute from './AdminProtectedRoute';
+import RequireAdmin from './RequireAdmin';
 import Header from './Header';
 import OfferBar from './OfferBar';
 import LiveGigs from '../pages/LiveGigs';
@@ -16,6 +17,7 @@ import AuthModal from './AuthModal';
 import Wallet from '../pages/Wallet';
 import Admin from '../pages/Admin';
 import ReferAndEarn from '../pages/ReferAndEarn';
+import AdminDashboard from '../pages/AdminDashboard';
 
 // Custom hook for local authentication simulation
 const useAuth = () => {
@@ -377,6 +379,11 @@ const App: React.FC = () => {
                 <AuthModal />
                 <Routes>
                     <Route path="/admin" element={<AdminProtectedRoute><Admin /></AdminProtectedRoute>} />
+                    <Route path="/admin-dashboard" element={
+                        <RequireAdmin>
+                            <AdminDashboard />
+                        </RequireAdmin>
+                    } />
 
                     <Route path="*" element={
                         <div className="min-h-screen bg-brand-dark flex flex-col">
