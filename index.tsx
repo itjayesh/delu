@@ -8,8 +8,12 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+import { AuthProvider } from "./context/AuthContext";
+
 root.render(
   <React.StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );

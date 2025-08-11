@@ -1,12 +1,12 @@
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppContext, AppContextType } from '../context/AppContext';
 import { User, Gig, GigStatus, WalletLoadRequest, Transaction, TransactionType, Coupon, WithdrawalRequest, GigUser, WalletRequestStatus, WithdrawalRequestStatus } from '../types';
 import { MOCK_USERS, MOCK_GIGS, MOCK_COUPONS, MOCK_PLATFORM_CONFIG } from '../mockData';
 
 import ProtectedRoute from './ProtectedRoute';
-import AdminProtectedRoute from './AdminProtectedRoute';
+import RequireAdmin from './RequireAdmin';
 import Header from './Header';
 import OfferBar from './OfferBar';
 import LiveGigs from '../pages/LiveGigs';
@@ -14,8 +14,8 @@ import MyGigs from '../pages/MyGigs';
 import CreateGig from '../pages/CreateGig';
 import AuthModal from './AuthModal';
 import Wallet from '../pages/Wallet';
-import Admin from '../pages/Admin';
 import ReferAndEarn from '../pages/ReferAndEarn';
+import AdminDashboard from '../pages/admin';
 
 // Custom hook for local authentication simulation
 const useAuth = () => {
@@ -373,30 +373,39 @@ const App: React.FC = () => {
 
     return (
         <AppContext.Provider value={appContextValue}>
-            <HashRouter>
+            <BrowserRouter>
                 <AuthModal />
                 <Routes>
-                    <Route path="/admin" element={<AdminProtectedRoute><Admin /></AdminProtectedRoute>} />
-
-                    <Route path="*" element={
-                        <div className="min-h-screen bg-brand-dark flex flex-col">
-                            <OfferBar />
-                            <Header />
-                            <main className="flex-grow container mx-auto p-4 md:p-6">
-                                <Routes>
-                                    <Route path="/live" element={<LiveGigs />} />
-                                    <Route path="/my-gigs" element={<ProtectedRoute><MyGigs /></ProtectedRoute>} />
-                                    <Route path="/create" element={<ProtectedRoute><CreateGig /></ProtectedRoute>} />
-                                    <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
-                                    <Route path="/refer-and-earn" element={<ProtectedRoute><ReferAndEarn /></ProtectedRoute>} />
-                                    <Route path="/" element={<Navigate to="/live" replace />} />
-                                    <Route path="*" element={<Navigate to="/live" replace />} />
-                                </Routes>
-                            </main>
-                        </div>
-                    } />
+                    <Route
+                        path="/admin"
+                        element={
+                            <RequireAdmin>
+                                <AdminDashboard />
+                            </RequireAdmin>
+                        }
+                    />
+                    <Route
+                        path="*"
+                        element={
+                            <div className="min-h-screen bg-brand-dark flex flex-col">
+                                <OfferBar />
+                                <Header />
+                                <main className="flex-grow container mx-auto p-4 md:p-6">
+                                    <Routes>
+                                        <Route path="/live" element={<LiveGigs />} />
+                                        <Route path="/my-gigs" element={<ProtectedRoute><MyGigs /></ProtectedRoute>} />
+                                        <Route path="/create" element={<ProtectedRoute><CreateGig /></ProtectedRoute>} />
+                                        <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+                                        <Route path="/refer-and-earn" element={<ProtectedRoute><ReferAndEarn /></ProtectedRoute>} />
+                                        <Route path="/" element={<Navigate to="/live" replace />} />
+                                        <Route path="*" element={<Navigate to="/live" replace />} />
+                                    </Routes>
+                                </main>
+                            </div>
+                        }
+                    />
                 </Routes>
-            </HashRouter>
+            </BrowserRouter>
         </AppContext.Provider>
     );
 };
