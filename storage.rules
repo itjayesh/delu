@@ -1,0 +1,32 @@
+// Firebase Storage Security Rules
+// - Authenticated users can upload/download their own files under uploads/{uid}/...
+// - Admins (role == 'admin' in custom claims) can access any file
+// - All other access is denied
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Allow access to files under uploads/{uid}/... if user owns them
+    match /uploads/{uid}/{allPaths=**} {
+      // Allow the owner to read/write
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      // Allow admins to read/write any file
+      allow read, write: if isAdmin();
+
+      function isAdmin() {
+        return request.auth != null && request.auth.token.role == 'admin';
+      }
+    }
+
+    // Allow admins to access any file anywhere in storage
+    match /{allPaths=**} {
+      allow read, write: if isAdmin();
+
+      function isAdmin() {
+        return request.auth != null && request.auth.token.role == 'admin';
+      }
+    }
+  }
+}
