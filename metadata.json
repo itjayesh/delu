@@ -1,0 +1,8 @@
+{
+  "name": "delu.live",
+  "description": "A peer-to-peer delivery platform for college campuses. Post a parcel delivery gig, and have another student deliver it for you.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "prompt": ""
+}
