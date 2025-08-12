@@ -1,49 +1,35 @@
-# Delu - University Delivery Platform
+# delu.live - Gig Delivery Platform
 
-This contains everything you need to run your app locally with Firebase backend integration.
+A modern delivery and gig platform built with React, TypeScript, and Firebase.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1QZVdvFnDdIj8ncp060jiWF5gSr0cWYCv?showPreview=true&showAssistant=true&showTreeView=true&showCode=true
+## 🚀 Quick Start
 
-## Firebase Backend Integration
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+- Firebase project
 
-This application uses Firebase as its backend service, providing:
-- **Authentication**: User sign-up, sign-in, and account management
-- **Firestore Database**: Real-time NoSQL database for storing application data
-- **Cloud Storage**: File storage for profile photos, college IDs, and gig attachments
-- **Analytics**: User behavior and app performance tracking
+### Firebase Setup (Required)
 
-## Prerequisites
+1. **Create a Firebase Project**
+   - Go to [Firebase Console](https://console.firebase.google.com)
+   - Click "Create a project" or select an existing project
+   - Enable the following services:
+     - Authentication (Email/Password)
+     - Firestore Database
+     - Storage
+     - Analytics (optional)
 
-- Node.js (version 16 or higher)
-- Firebase project with the following services enabled:
-  - Authentication
-  - Firestore Database
-  - Cloud Storage
-  - Analytics (optional)
+2. **Get Your Firebase Configuration**
+   - In Firebase Console, go to Project Settings (⚙️ icon)
+   - Scroll down to "Your apps" section
+   - Click the web app icon (`</>`) or "Add app" if none exists
+   - Register your app with a nickname (e.g., "delu-web")
+   - Copy the configuration object
 
-## Firebase Setup
-
-### 1. Create Firebase Project
-
-1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project or use an existing one
-3. Enable the following services:
-   - **Authentication**: Enable Email/Password provider
-   - **Firestore Database**: Create in production mode
-   - **Storage**: Create with default rules
-   - **Analytics**: Enable if you want usage tracking
-
-### 2. Get Firebase Configuration
-
-1. In your Firebase project, go to Project Settings
-2. Scroll down to "Your apps" section
-3. Click on the web app or create a new web app
-4. Copy the Firebase configuration object
-
-### 3. Environment Variables Setup
-
-1. Create a `.env.local` file in the project root
-2. Add your Firebase configuration:
+3. **Set Up Environment Variables**
+   - Create a `.env.local` file in the project root
+   - Add your Firebase configuration:
 
 ```env
 # Firebase Configuration
@@ -60,38 +46,25 @@ VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
 ### 4. Firestore Database Structure
 
-The application uses the following Firestore collections:
-
-- **users**: User profiles and account information
-- **gigs**: Delivery gig listings and details
-- **walletRequests**: Wallet load requests from users
-- **withdrawalRequests**: Withdrawal requests from users
-- **transactions**: All wallet transactions and payments
-- **coupons**: Promotional codes and discounts
-- **platformConfig**: Application configuration settings
-
-### 5. Storage Bucket Organization
-
-Files are organized in the following folder structure:
-
-```
-storage/
-├── profile-photos/     # User profile pictures
-├── college-ids/        # College ID verification documents
-├── acceptance-selfies/ # Gig acceptance verification photos
-└── gig-attachments/    # Gig-related file uploads
+```env
+VITE_FIREBASE_API_KEY=AIza...
+VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
+VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
+VITE_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
 
-### 6. Security Rules
+4. **Configure Firestore Security Rules**
+   - In Firebase Console, go to Firestore Database → Rules
+   - Use these basic rules for development:
 
-Make sure to configure appropriate security rules for Firestore and Storage:
-
-**Firestore Rules Example:**
 ```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read/write their own data
+    // Users can read/write their own document
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
@@ -103,35 +76,173 @@ service cloud.firestore {
     }
     
     // Admin-only collections
-    match /platformConfig/{document} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && 
+    match /{document=**} {
+      allow read, write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
   }
 }
 ```
 
-**Storage Rules Example:**
+5. **Configure Storage Security Rules**
+   - In Firebase Console, go to Storage → Rules
+   - Use these rules:
+
 ```javascript
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Users can upload their own files
-    match /profile-photos/{userId}_{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    match /college-ids/{userId}_{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Gig-related files
-    match /acceptance-selfies/{allPaths=**} {
+    match /{allPaths=**} {
       allow read, write: if request.auth != null;
     }
-    
-    match /gig-attachments/{allPaths=**} {
+  }
+}
+```
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd delu
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Start the development server**
+```bash
+npm run dev
+```
+
+The application will open at `http://localhost:5173`
+
+### 🔧 Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+
+## 📁 Project Structure
+
+```
+src/
+├── components/         # React components
+├── pages/             # Page components
+├── context/           # React context providers
+├── firebase/          # Firebase configuration and services
+│   ├── config.ts      # Firebase initialization
+│   ├── firestoreService.ts  # Database operations
+│   ├── storageService.ts    # File storage operations
+│   └── index.ts       # Centralized exports
+├── types.ts           # TypeScript type definitions
+└── mockData.ts        # Sample data for development
+```
+
+## 🔥 Firebase Services
+
+### Authentication
+- Email/password authentication
+- User session management
+- Admin user support
+
+### Firestore Database
+Collections:
+- **users** - User profiles and account data
+- **gigs** - Delivery job listings
+- **walletRequests** - Wallet top-up requests
+- **withdrawalRequests** - Withdrawal requests
+- **transactions** - Financial transaction history
+- **coupons** - Promotional codes
+- **platformConfig** - App configuration settings
+
+### Cloud Storage
+Organized folder structure:
+- `profile-photos/` - User profile pictures
+- `college-ids/` - Student ID verification documents
+- `acceptance-selfies/` - Gig acceptance verification photos
+- `gig-attachments/` - Additional gig-related files
+
+## 🎯 Features
+
+- **User Authentication** - Secure email/password login
+- **Gig Management** - Create, browse, and manage delivery jobs
+- **Wallet System** - Digital wallet with top-up and withdrawal
+- **Real-time Updates** - Live synchronization across devices
+- **Admin Panel** - Complete administrative controls
+- **File Uploads** - Profile photos, ID verification, attachments
+- **Referral System** - Earn rewards for referrals
+- **Coupon System** - Promotional codes and discounts
+
+## 🛠️ Development
+
+### Environment Variables
+All environment variables must be prefixed with `VITE_` to be accessible in the client-side code.
+
+### State Management
+The app uses React Context for global state management with real-time Firebase synchronization.
+
+### Type Safety
+Full TypeScript support with comprehensive type definitions for all data structures.
+
+## 🚀 Deployment
+
+1. **Build the project**
+```bash
+npm run build
+```
+
+2. **Set production environment variables**
+   - Create `.env.production` with your production Firebase config
+   - Ensure all `VITE_` prefixed variables are set
+
+3. **Deploy to your hosting provider**
+   - Firebase Hosting
+   - Vercel
+   - Netlify
+   - Or any static hosting service
+
+## 🔐 Security
+
+- API keys and sensitive data stored in environment variables
+- Firebase security rules for data access control
+- User authentication required for all operations
+- Admin-only functions protected by role-based access
+
+## 📱 Features Overview
+
+### For Users
+- Browse available delivery gigs
+- Create delivery requests
+- Manage wallet balance
+- Track delivery history
+- Refer friends for rewards
+
+### For Admin
+- User management
+- Gig oversight
+- Financial transaction monitoring
+- Platform configuration
+- Analytics and reporting
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+**Need help?** Check the Firebase Console for detailed error messages or create an issue in this repository.
       allow read, write: if request.auth != null;
     }
   }
