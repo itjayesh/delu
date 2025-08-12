@@ -31,6 +31,7 @@ import {
   subscribeToCoupons,
   subscribeToPlatformConfig
 } from '../firebase/firestoreService';
+import { initializeFirestoreData } from '../firebase/initializeData';
 
 import ProtectedRoute from './ProtectedRoute';
 import AdminProtectedRoute from './AdminProtectedRoute';
@@ -59,7 +60,7 @@ const useAuth = () => {
                         setCurrentUser(userData);
                     } else {
                         // If user document doesn't exist, create one with basic info
-                        const isAdminUser = firebaseUser.email === 'admin@delu.live';
+                        const isAdminUser = firebaseUser.email === 'admin@unihive.live';
                         const newUser: User = {
                             id: firebaseUser.uid,
                             name: firebaseUser.displayName || (isAdminUser ? 'Admin User' : ''),
@@ -124,6 +125,21 @@ const App: React.FC = () => {
             }
         });
 
+        // Initialize Firestore data on first load (for new installations)
+        const initData = async () => {
+            const hasBeenInitialized = localStorage.getItem('firestore-initialized');
+            if (!hasBeenInitialized) {
+                try {
+                    await initializeFirestoreData();
+                    localStorage.setItem('firestore-initialized', 'true');
+                } catch (error) {
+                    console.log('Firebase initialization may have already been done or failed:', error);
+                    // Don't prevent app from loading if initialization fails
+                }
+            }
+        };
+        initData();
+
         return () => {
             unsubscribeUsers();
             unsubscribeGigs();
@@ -183,7 +199,7 @@ const App: React.FC = () => {
     const signup = useCallback(async (userData: Omit<User, 'id' | 'rating' | 'deliveriesCompleted' | 'walletBalance' | 'isAdmin' | 'referralCode' | 'firstRechargeCompleted' | 'usedCouponCodes' | 'createdAt'>, password: string, referredByCode?: string) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, userData.email, password);
-            const isAdminUser = userData.email === 'admin@delu.live';
+            const isAdminUser = userData.email === 'admin@unihive.live';
             const newUser: User = {
                 id: userCredential.user.uid,
                 ...userData,

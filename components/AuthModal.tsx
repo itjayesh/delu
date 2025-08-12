@@ -6,6 +6,7 @@ import CameraCapture from './CameraCapture';
 import Button from './Button';
 import { UserIcon, PhoneIcon, HomeIcon, IdIcon, CameraIcon, LockClosedIcon, GiftIcon, EnvelopeIcon } from './icons';
 import Modal from './Modal';
+import { uploadProfilePhoto, uploadCollegeId } from '../firebase/storageService';
 
 const LoginView: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
     const context = useContext(AppContext);
@@ -45,10 +46,10 @@ const LoginView: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
         <>
             <div className="text-center">
                 <h1 className="text-3xl font-bold text-white">Log In</h1>
-                <p className="text-gray-400 mt-2">Welcome back to delu.live.</p>
+                <p className="text-gray-400 mt-2">Welcome back to UniHive.</p>
                 <div className="text-xs text-gray-500 mt-4 bg-brand-dark-300 p-2 rounded-lg">
-                    <p><strong className="font-semibold text-gray-400">Admin:</strong> admin@delu.live</p>
-                    <p><strong className="font-semibold text-gray-400">User:</strong> user@delu.live</p>
+                    <p><strong className="font-semibold text-gray-400">Admin:</strong> admin@unihive.live</p>
+                    <p><strong className="font-semibold text-gray-400">User:</strong> user@unihive.live</p>
                     <p>(Password can be anything for demo)</p>
                 </div>
             </div>
@@ -114,11 +115,13 @@ const SignupView: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
         setError('');
         setLoading(true);
         try {
+            // First create the user with temporary placeholder URLs
             await context?.signup({
                 name, phone, email, block,
-                profilePhotoUrl: profilePhoto,
-                collegeIdUrl: collegeId,
+                profilePhotoUrl: profilePhoto, // Keep as base64 temporarily 
+                collegeIdUrl: collegeId, // Keep as base64 temporarily
             }, password, referralCode);
+            
             context?.closeAuthModal();
         } catch (err: any) {
             setError(err.message || 'An error occurred during signup.');
@@ -130,7 +133,7 @@ const SignupView: React.FC<{ onSwitch: () => void }> = ({ onSwitch }) => {
     return (
         <>
             <div className="text-center">
-                <h1 className="text-3xl font-bold text-white">Join delu.live</h1>
+                <h1 className="text-3xl font-bold text-white">Join UniHive</h1>
                 <p className="text-gray-400 mt-2">Let's get you set up to send and receive parcels.</p>
             </div>
             {error && <div className="bg-red-500/20 text-red-300 p-3 rounded-lg text-center">{error}</div>}

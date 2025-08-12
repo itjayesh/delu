@@ -20,10 +20,11 @@ export const initializeFirestoreData = async () => {
     }
     console.log('Coupons initialized');
     
-    // Create admin user document (this will be created when admin signs up)
-    // We'll skip this for now as it should be created through the signup process
+    // Note: Admin user will be created automatically when admin@unihive.live signs up
+    // The system will detect admin email and set appropriate permissions
     
     console.log('Firestore data initialization complete!');
+    console.log('To create admin account, sign up with email: admin@unihive.live');
   } catch (error) {
     console.error('Error initializing Firestore data:', error);
   }
