@@ -4,6 +4,55 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppContext, AppContextType } from '../context/AppContext';
 import { User, Gig, GigStatus, WalletLoadRequest, Transaction, TransactionType, Coupon, WithdrawalRequest, GigUser, WalletRequestStatus, WithdrawalRequestStatus } from '../types';
 import { MOCK_USERS, MOCK_GIGS, MOCK_COUPONS, MOCK_PLATFORM_CONFIG } from '../mockData';
+import FirebaseConfigWizard from './FirebaseConfigWizard';
+
+// Check if Firebase configuration is properly set up
+const isFirebaseConfigured = () => {
+  const requiredEnvVars = [
+    import.meta.env.VITE_FIREBASE_API_KEY,
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    import.meta.env.VITE_FIREBASE_APP_ID,
+    import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  ];
+  
+  return requiredEnvVars.every(value => 
+    value && 
+    value !== 'your-api-key-here' && 
+    !value.includes('your-')
+  );
+};
+
+const getMissingVars = () => {
+  const envVarNames = [
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN', 
+    'VITE_FIREBASE_PROJECT_ID',
+    'VITE_FIREBASE_STORAGE_BUCKET',
+    'VITE_FIREBASE_MESSAGING_SENDER_ID',
+    'VITE_FIREBASE_APP_ID',
+    'VITE_FIREBASE_MEASUREMENT_ID'
+  ];
+  
+  const envVarValues = [
+    import.meta.env.VITE_FIREBASE_API_KEY,
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    import.meta.env.VITE_FIREBASE_APP_ID,
+    import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  ];
+  
+  return envVarNames.filter((name, index) => {
+    const value = envVarValues[index];
+    return !value || value === 'your-api-key-here' || value.includes('your-');
+  });
+};
+
+// Import Firebase services (these will fail gracefully if config is missing)
 import { auth } from '../firebase/config';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { 
@@ -100,6 +149,39 @@ const useAuth = () => {
 }
 
 const App: React.FC = () => {
+    const [configCheckComplete, setConfigCheckComplete] = useState(false);
+    
+    // Check if Firebase is properly configured
+    useEffect(() => {
+        // Give Firebase a moment to initialize and show any config errors
+        const timer = setTimeout(() => {
+            setConfigCheckComplete(true);
+        }, 1000);
+        
+        return () => clearTimeout(timer);
+    }, []);
+    
+    // Show configuration wizard if Firebase is not properly set up
+    if (!configCheckComplete) {
+        return (
+            <div className="min-h-screen bg-brand-dark flex items-center justify-center">
+                <div className="text-white text-center">
+                    <div className="text-4xl mb-4">🔥</div>
+                    <div>Initializing Firebase...</div>
+                </div>
+            </div>
+        );
+    }
+    
+    if (!isFirebaseConfigured()) {
+        return (
+            <FirebaseConfigWizard 
+                missingVars={getMissingVars()} 
+                onConfigComplete={() => window.location.reload()} 
+            />
+        );
+    }
+
     const { currentUser, updateUser, isAuthLoading } = useAuth();
     const [users, setUsers] = useState<User[]>([]);
     const [gigs, setGigs] = useState<Gig[]>([]);
