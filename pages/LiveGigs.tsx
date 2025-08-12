@@ -7,6 +7,7 @@ import Modal from '../components/Modal';
 import Button from '../components/Button';
 import AcceptanceFlowModal from '../components/AcceptanceFlowModal';
 import { PhoneIcon, UserIcon } from '../components/icons';
+import { uploadAcceptanceSelfie } from '../firebase/storageService';
 
 const LiveGigs: React.FC = () => {
     const context = useContext(AppContext);
@@ -41,27 +42,36 @@ const LiveGigs: React.FC = () => {
         setGigToAccept(gig);
     };
 
-    const handleConfirmAccept = (selfie: string) => {
+    const handleConfirmAccept = async (selfie: string) => {
         if (!gigToAccept || !currentUser || !selfie) {
             return;
         }
         
-        const delivererInfo: GigUser = {
-            id: currentUser.id,
-            name: currentUser.name,
-            phone: currentUser.phone,
-            email: currentUser.email,
-        };
+        try {
+            // Upload selfie to Firebase Storage
+            const acceptanceSelfieUrl = await uploadAcceptanceSelfie(gigToAccept.id, selfie);
+            
+            const delivererInfo: GigUser = {
+                id: currentUser.id,
+                name: currentUser.name,
+                phone: currentUser.phone,
+                email: currentUser.email,
+            };
 
-        const updatedGigData = { 
-            status: GigStatus.ACCEPTED, 
-            deliverer: delivererInfo,
-            acceptanceSelfieUrl: selfie
-        };
-        updateGig(gigToAccept.id, updatedGigData);
-        
-        setAcceptedGigDetails({ ...gigToAccept, ...updatedGigData });
-        setGigToAccept(null); // Close the acceptance modal
+            const updatedGigData = { 
+                status: GigStatus.ACCEPTED, 
+                deliverer: delivererInfo,
+                acceptanceSelfieUrl
+            };
+            
+            await updateGig(gigToAccept.id, updatedGigData);
+            
+            setAcceptedGigDetails({ ...gigToAccept, ...updatedGigData });
+            setGigToAccept(null); // Close the acceptance modal
+        } catch (error: any) {
+            console.error('Error accepting gig:', error);
+            setWaitError('Failed to accept gig. Please try again.');
+        }
     }
     
     return (

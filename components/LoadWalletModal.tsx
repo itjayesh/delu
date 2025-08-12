@@ -3,6 +3,7 @@ import { AppContext } from '../context/AppContext';
 import Modal from './Modal';
 import Button from './Button';
 import { RupeeIcon } from './icons';
+import { uploadPaymentScreenshot } from '../firebase/storageService';
 
 interface LoadWalletModalProps {
     isOpen: boolean;
@@ -19,6 +20,7 @@ const LoadWalletModal: React.FC<LoadWalletModalProps> = ({ isOpen, onClose }) =>
     const [fileName, setFileName] = useState<string>('');
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState('');
+    const [uploading, setUploading] = useState(false);
 
     const resetForm = useCallback(() => {
         setAmount('');
@@ -28,6 +30,7 @@ const LoadWalletModal: React.FC<LoadWalletModalProps> = ({ isOpen, onClose }) =>
         setFileName('');
         setError('');
         setSuccess(false);
+        setUploading(false);
     }, []);
 
     const handleClose = useCallback(() => {
@@ -74,15 +77,26 @@ const LoadWalletModal: React.FC<LoadWalletModalProps> = ({ isOpen, onClose }) =>
             return;
         }
 
-        if (context) {
+        if (context && context.currentUser) {
             try {
+                setUploading(true);
+                
+                // Generate a temporary ID for the request
+                const tempRequestId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+                
+                // Upload screenshot to Firebase Storage
+                const screenshotUrl = await uploadPaymentScreenshot(tempRequestId, screenshot);
+                
+                // Submit the wallet load request with the uploaded screenshot URL
                 await context.requestWalletLoad(
-                    { amount: Number(amount), utr: utr.trim(), screenshotUrl: screenshot },
+                    { amount: Number(amount), utr: utr.trim(), screenshotUrl },
                     couponCode.trim()
                 );
                 setSuccess(true);
-            } catch (err) {
-                 setError('An error occurred while submitting the request.');
+            } catch (err: any) {
+                setError(err.message || 'An error occurred while submitting the request.');
+            } finally {
+                setUploading(false);
             }
         } else {
             setError('Context is not available. Please try again later.');
@@ -177,8 +191,8 @@ const LoadWalletModal: React.FC<LoadWalletModalProps> = ({ isOpen, onClose }) =>
                         />
                     </div>
                     
-                    <Button type="submit" fullWidth>
-                        Submit Request
+                    <Button type="submit" fullWidth disabled={uploading}>
+                        {uploading ? 'Uploading...' : 'Submit Request'}
                     </Button>
                 </form>
             </div>
