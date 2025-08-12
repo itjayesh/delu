@@ -65,7 +65,7 @@ const Header: React.FC = () => {
                     <div className="flex items-center">
                         <Link to={currentUser?.isAdmin ? "/admin" : "/live"} className="flex-shrink-0 flex items-center gap-2">
                             <LogoIcon className="h-8 w-auto text-brand-primary" />
-                            <span className="font-bold text-xl text-white">delu.live</span>
+                            <span className="font-bold text-xl text-white">UniHive</span>
                         </Link>
                         {currentUser && (currentUser.isAdmin ? <AdminNav /> : <UserNav />)}
                     </div>

@@ -120,7 +120,7 @@ const LoadWalletModal: React.FC<LoadWalletModalProps> = ({ isOpen, onClose }) =>
             <div className="space-y-6">
                 <div className="text-center bg-white p-4 rounded-lg">
                     <img
-                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=delu@live&pn=DeluLive"
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=admin@unihive.live&pn=UniHive"
                         alt="UPI QR Code"
                         className="mx-auto w-40 h-40 object-contain rounded-md"
                     />
@@ -128,7 +128,7 @@ const LoadWalletModal: React.FC<LoadWalletModalProps> = ({ isOpen, onClose }) =>
                         Scan to pay using any UPI app
                     </p>
                     <p className="mt-1 text-xs text-brand-dark-300">
-                        UPI ID: <span className="font-mono font-bold">delu@live</span>
+                        UPI ID: <span className="font-mono font-bold">admin@unihive.live</span>
                     </p>
                 </div>
 
